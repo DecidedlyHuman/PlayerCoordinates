@@ -1,0 +1,7 @@
+// Ignore IDE directories and files.
+.idea/
+
+// Ignore unnecessary project directories.
+bin/
+obj/
+Properties/
