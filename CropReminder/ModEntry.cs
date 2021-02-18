@@ -20,7 +20,7 @@ namespace CropReminder
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            
+            throw new NotImplementedException();
         }
     }
 }
