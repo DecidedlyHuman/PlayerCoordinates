@@ -63,8 +63,17 @@ namespace PlayerCoordinates
                 _currentMapName = newMap;
         }
 
+        private void UpdateCurrentCoordinates()
+        {
+            // Track the cursor instead of the player if appropriate.
+            _currentCoords = (_trackingCursor) ? Game1.currentCursorTile : Game1.player.getTileLocation();
+        }
+
         private void LogCurrentCoordinates()
         {
+            if (!_showHud)
+                return;
+
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
 
             FileHandler file = new FileHandler(finalPath, _currentCoords, _currentMapName, Monitor);
@@ -78,24 +87,23 @@ namespace PlayerCoordinates
             if (!_showHud)
                 return;
 
-            // Track the cursor instead of the player if appropriate.
-            _currentCoords = (_trackingCursor) ? Game1.currentCursorTile : Game1.player.getTileLocation();
-            
+            // We only need to update our co-ordinates if we're drawing the HUD. Maybe make this an option?
+            UpdateCurrentCoordinates();
+
             // Everything below this point is messy and terrible, and I am a bad person for doing so.
             // It works, but do not do what I do.
             // TODO: Make everything below here not terrible.
-            Vector2 position = new Vector2(_currentCoords.x, _currentCoords.y);
             Vector2 topTextPosition = new Vector2(23, 17);
             Vector2 bottomTextPosition = new Vector2(topTextPosition.X, topTextPosition.Y + 36);
 
             world.SpriteBatch.Draw(_coordinateBox, new Vector2(9, 9), Color.White);
             Utility.drawTextWithShadow(world.SpriteBatch,
-                $"X: {position.X}",
+                $"X: {_currentCoords.x}",
                 Game1.dialogueFont,
                 topTextPosition,
                 Color.Black);
             Utility.drawTextWithShadow(world.SpriteBatch,
-                $"Y: {position.Y}",
+                $"Y: {_currentCoords.y}",
                 Game1.dialogueFont,
                 bottomTextPosition,
                 Color.Black);
@@ -103,12 +111,14 @@ namespace PlayerCoordinates
             //Draw a rectangle around the cursor position when tracking the cursor.
             if (_trackingCursor)
             {
-                if (position.Y < 0 || position.X < 0)
+                if (_currentCoords.y < 0 || _currentCoords.x < 0)
                     return; // We don't want to draw our tile rectangle if the cursor coordinates are negative.
 
                 world.SpriteBatch.Draw(
                     Game1.mouseCursors,
-                    Game1.GlobalToLocal(Game1.viewport, position * Game1.tileSize) * Game1.options.zoomLevel,
+                    Game1.GlobalToLocal(
+                        Game1.viewport,
+                        new Vector2(_currentCoords.x, _currentCoords.y) * Game1.tileSize) * Game1.options.zoomLevel,
                     Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 29),
                     Color.White,
                     0.0f,
