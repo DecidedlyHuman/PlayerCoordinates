@@ -3,7 +3,7 @@
         <!-- 
         This is where your game path, and zip directory should be set.
         -->
-        <GamePath>C:\Development\Stardew Valley\Stardew Valley-1.5.4_SMAPI-3.9.5</GamePath>
+        <GamePath>C:\Development\Stardew Valley\Stardew Valley-1.5.4_SMAPI-3.10.1</GamePath>
         <ModZipPath>$(SolutionDir)\ReleaseZip</ModZipPath>
     </PropertyGroup>
 </Project>
