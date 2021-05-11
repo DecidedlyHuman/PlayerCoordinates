@@ -29,23 +29,45 @@ namespace PlayerCoordinates
             _coordsToAdd = new Coordinates(coordinates.x, coordinates.y);
             _mapName = mapName;
             _monitor = monitor;
+        }
 
+        public bool LogCoordinates()
+        {
+           return SaveCoords();
+        }
+
+        private void LogException(Exception e)
+        {
+            _monitor.Log($"Exception: {e.Message}.", LogLevel.Error);
+            _monitor.Log($"{e.Data}.", LogLevel.Error);
+        }
+
+        private bool SaveCoords()
+        {
             try
             {
-                SaveCoords();
+                LoadCoordsFromFile();
+                AddNewCoords();
             }
             catch (Exception e)
             {
-                _monitor.Log($"Exception: {e.Message}.", LogLevel.Error);
-                _monitor.Log($"{e.Data}.", LogLevel.Error);
-            }
-        }
+                LogException(e);
 
-        private void SaveCoords()
-        {
-            LoadCoordsFromFile();
-            AddNewCoords();
-            WriteCoordsToFile();
+                return false;
+            }
+
+            try
+            {
+                WriteCoordsToFile();
+            }
+            catch (Exception e)
+            {
+                LogException(e);
+
+                return false;
+            }
+            
+            return true;
         }
 
         private void AddNewCoords()
@@ -82,7 +104,7 @@ namespace PlayerCoordinates
             {
                 fileWriter.WriteLine(s);
             }
-            
+
             fileWriter.WriteLine();
             fileWriter.Close();
         }

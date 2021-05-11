@@ -76,7 +76,15 @@ namespace PlayerCoordinates
 
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
 
+            // This is bad, and I need to split things up better. At some point. For now, this is fine.
             FileHandler file = new FileHandler(finalPath, _currentCoords, _currentMapName, Monitor);
+            
+            if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
+                Game1.showGlobalMessage($"Co-ordinates logged.\r\n" +
+                                        $"Check the mod folder!");
+            else
+                Game1.showGlobalMessage($"Failed to save co-ordinates.\r\n" +
+                                        $"Check your SMAPI log for details.");
         }
 
         private void DrawCoordinates(object o, RenderedHudEventArgs world)
