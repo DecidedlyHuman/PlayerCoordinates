@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PlayerCoordinates.Helpers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -28,15 +29,50 @@ namespace PlayerCoordinates
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            helper.Events.GameLoop.GameLaunched += GameLaunched;
             helper.Events.Display.RenderedHud += DrawCoordinates;
             helper.Events.Display.RenderedWorld += UpdateCurrentMap;
             helper.Events.Input.ButtonPressed += ButtonPressed;
             _modDirectory = Helper.DirectoryPath;
 
-            this._config = this.Helper.ReadConfig<ModConfig>();
-
             // The default source is the current mod folder, so we don't need to specify that here.
             _coordinateBox = helper.Content.Load<Texture2D>("assets/box.png");
+        }
+
+        private void GameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            this._config = this.Helper.ReadConfig<ModConfig>();
+
+            try // This way, we avoid logging an exception if the user doesn't have GMCM installed.
+            {
+                RegisterWithGmcm();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private void RegisterWithGmcm()
+        {
+            GenericModConfigMenuAPI configMenuApi =
+                Helper.ModRegistry.GetApi<GenericModConfigMenuAPI>("spacechase0.GenericModConfigMenu");
+
+            configMenuApi.RegisterModConfig(ModManifest,
+                () => _config = new ModConfig(),
+                () => Helper.WriteConfig(_config));
+
+            configMenuApi.RegisterSimpleOption(ModManifest, "HUD Toggle",
+                "The key used to toggle the co-ordinate HUD.",
+                () => _config.CoordinateHUDToggle,
+                (SButton button) => _config.CoordinateHUDToggle = button);
+            configMenuApi.RegisterSimpleOption(ModManifest, "Log Co-ordinates",
+                "The key used to log the current co-ordinates to file.",
+                () => _config.LogCoordinates,
+                (SButton button) => _config.LogCoordinates = button);
+            configMenuApi.RegisterSimpleOption(ModManifest, "Toggle Tracking Target",
+                "The key used to toggle between tracking the cursor and the player's co-ordinates.",
+                () => _config.SwitchToCursorCoords,
+                (SButton button) => _config.SwitchToCursorCoords = button);
         }
 
         private void ButtonPressed(object o, ButtonPressedEventArgs button)
@@ -78,7 +114,7 @@ namespace PlayerCoordinates
 
             // This is bad, and I need to split things up better. At some point. For now, this is fine.
             FileHandler file = new FileHandler(finalPath, _currentCoords, _currentMapName, Monitor);
-            
+
             if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
                 Game1.showGlobalMessage($"Co-ordinates logged.\r\n" +
                                         $"Check the mod folder!");
