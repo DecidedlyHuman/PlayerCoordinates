@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using StardewModdingAPI;
 
-namespace PlayerCoordinates
+// A lot of refactoring of *everything* here is necessary for me to be happy with this, but given this
+// isn't meant to be extended upon, it's okay for now.
+namespace PlayerCoordinates.Utilities
 {
     public class FileHandler
     {
