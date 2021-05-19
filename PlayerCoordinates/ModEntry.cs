@@ -16,7 +16,7 @@ namespace PlayerCoordinates
         private Texture2D _coordinateBox;
         private ModConfig _config;
         private bool _showHud = true;
-        private bool _trackingCursor = false;
+        private bool _trackingCursor;
         private string _currentMapName;
         private string _modDirectory;
         private Coordinates _currentCoords;
@@ -63,15 +63,15 @@ namespace PlayerCoordinates
             configMenuApi.RegisterSimpleOption(ModManifest, "HUD Toggle",
                 "The key used to toggle the co-ordinate HUD.",
                 () => _config.CoordinateHUDToggle,
-                (SButton button) => _config.CoordinateHUDToggle = button);
+                (button) => _config.CoordinateHUDToggle = button);
             configMenuApi.RegisterSimpleOption(ModManifest, "Log Co-ordinates",
                 "The key used to log the current co-ordinates to file.",
                 () => _config.LogCoordinates,
-                (SButton button) => _config.LogCoordinates = button);
+                (button) => _config.LogCoordinates = button);
             configMenuApi.RegisterSimpleOption(ModManifest, "Toggle Tracking Target",
                 "The key used to toggle between tracking the cursor and the player's co-ordinates.",
                 () => _config.SwitchToCursorCoords,
-                (SButton button) => _config.SwitchToCursorCoords = button);
+                (button) => _config.SwitchToCursorCoords = button);
         }
 
         private void ButtonPressed(object o, ButtonPressedEventArgs button)
@@ -94,8 +94,8 @@ namespace PlayerCoordinates
 
             if (newMap == String.Empty)
                 newMap = "Unnamed Map";
-            else
-                _currentMapName = newMap;
+
+            _currentMapName = newMap;
         }
 
         private void UpdateCurrentCoordinates()
@@ -106,7 +106,7 @@ namespace PlayerCoordinates
 
         private void LogCurrentCoordinates()
         {
-            if (!_showHud)
+            if (!_showHud || !Context.IsWorldReady) // Look into why Context.IsWorldReady return true on title screen?
                 return;
 
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
@@ -115,11 +115,19 @@ namespace PlayerCoordinates
             FileHandler file = new FileHandler(finalPath, _currentCoords, _currentMapName, Monitor);
 
             if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
+            {
                 Game1.showGlobalMessage($"Co-ordinates logged.\r\n" +
                                         $"Check the mod folder!");
+                Logger.LogMessage(Monitor, LogLevel.Info,
+                    $"Co-ordinates ({_currentMapName}: {_currentCoords}) logged successfully.");
+            }
             else
+            {
                 Game1.showGlobalMessage($"Failed to save co-ordinates.\r\n" +
                                         $"Check your SMAPI log for details.");
+                Logger.LogMessage(Monitor, LogLevel.Error,
+                    $"Failed to log co-ordinates ({_currentMapName}: {_currentCoords}). Exception follows:");
+            }
         }
 
         private void DrawCoordinates(object o, RenderedHudEventArgs world)

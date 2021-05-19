@@ -9,13 +9,13 @@ namespace PlayerCoordinates.Utilities
 {
     public class FileHandler
     {
+        // Strictly speaking, this doesn't need to be a list. Consider just using a string?
         private List<string> _fileContents = new List<string>();
 
-        private FileInfo _fileInfo;
-        private Coordinates _coordsToAdd;
-        private string _mapName;
-
-        private IMonitor _monitor;
+        private readonly FileInfo _fileInfo;
+        private readonly Coordinates _coordsToAdd;
+        private readonly string _mapName;
+        private readonly IMonitor _monitor;
 
         /// <summary>
         /// 
@@ -34,17 +34,13 @@ namespace PlayerCoordinates.Utilities
 
         public bool LogCoordinates()
         {
-           return SaveCoords();
-        }
-
-        private void LogException(Exception e)
-        {
-            _monitor.Log($"Exception: {e.Message}.", LogLevel.Error);
-            _monitor.Log($"{e.Data}.", LogLevel.Error);
+            return SaveCoords();
         }
 
         private bool SaveCoords()
         {
+            // Best to fail safe, and not try to write the co-ordinates to file if either loading the file, or adding
+            // them to the list fails.
             try
             {
                 LoadCoordsFromFile();
@@ -52,7 +48,7 @@ namespace PlayerCoordinates.Utilities
             }
             catch (Exception e)
             {
-                LogException(e);
+                Logger.LogException(_monitor, e);
 
                 return false;
             }
@@ -63,11 +59,11 @@ namespace PlayerCoordinates.Utilities
             }
             catch (Exception e)
             {
-                LogException(e);
+                Logger.LogException(_monitor, e);
 
                 return false;
             }
-            
+
             return true;
         }
 

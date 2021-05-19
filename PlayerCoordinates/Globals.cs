@@ -14,5 +14,10 @@
         {
             return new Coordinates((int)v.X, (int)v.Y);
         }
+
+        public override string ToString()
+        {
+            return $"X: {x}, Y: {y}";
+        }
     }
 }
