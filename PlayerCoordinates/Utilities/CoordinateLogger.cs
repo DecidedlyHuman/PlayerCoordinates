@@ -10,6 +10,8 @@ namespace PlayerCoordinates.Utilities
     public class CoordinateLogger
     {
         // Strictly speaking, this doesn't need to be a list. Consider just using a string?
+        // I anticipate no problems with it being a list, though. Definitely consider it, though,
+        // given how 32-bit SDV can runs into memory issues for some people.
         private List<string> _fileContents = new List<string>();
 
         private readonly FileInfo _fileInfo;
