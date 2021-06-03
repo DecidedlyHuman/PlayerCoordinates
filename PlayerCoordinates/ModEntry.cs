@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -112,7 +113,7 @@ namespace PlayerCoordinates
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
 
             // This is bad, and I need to split things up better. At some point. For now, this is fine.
-            FileHandler file = new FileHandler(finalPath, _currentCoords, _currentMapName, Monitor);
+            CoordinateLogger file = new CoordinateLogger(finalPath, _currentCoords, _currentMapName, Monitor);
 
             if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
             {

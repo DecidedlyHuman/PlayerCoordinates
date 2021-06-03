@@ -7,7 +7,7 @@ using StardewModdingAPI;
 // isn't meant to be extended upon, it's okay for now.
 namespace PlayerCoordinates.Utilities
 {
-    public class FileHandler
+    public class CoordinateLogger
     {
         // Strictly speaking, this doesn't need to be a list. Consider just using a string?
         private List<string> _fileContents = new List<string>();
@@ -24,7 +24,7 @@ namespace PlayerCoordinates.Utilities
         /// <param name="coordinates">Co-ordinates to log</param>
         /// <param name="mapName">Map name</param>
         /// <param name="monitor">SMAPI logger</param>
-        public FileHandler(string fileName, Coordinates coordinates, string mapName, IMonitor monitor)
+        public CoordinateLogger(string fileName, Coordinates coordinates, string mapName, IMonitor monitor)
         {
             _fileInfo = new FileInfo(fileName);
             _coordsToAdd = new Coordinates(coordinates.x, coordinates.y);
