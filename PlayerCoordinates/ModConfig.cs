@@ -7,5 +7,6 @@ namespace PlayerCoordinates
         public SButton CoordinateHUDToggle { get; set; } = SButton.F5;
         public SButton LogCoordinates { get; set; } = SButton.F6;
         public SButton SwitchToCursorCoords { get; set; } = SButton.F7;
+        public bool LogTrackingTarget { get; set; } = true;
     }
 }

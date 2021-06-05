@@ -61,6 +61,10 @@ namespace PlayerCoordinates
                 () => _config = new ModConfig(),
                 () => Helper.WriteConfig(_config));
 
+            configMenuApi.RegisterSimpleOption(ModManifest, "Toggle Tracking Target",
+                "Whether or not you want the log to specify whether the player or cursor was the source of this co-ordinate.",
+                () => _config.LogTrackingTarget,
+                (bool value) => _config.LogTrackingTarget = value);
             configMenuApi.RegisterSimpleOption(ModManifest, "HUD Toggle",
                 "The key used to toggle the co-ordinate HUD.",
                 () => _config.CoordinateHUDToggle,
@@ -113,7 +117,7 @@ namespace PlayerCoordinates
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
 
             // This is bad, and I need to split things up better. At some point. For now, this is fine.
-            CoordinateLogger file = new CoordinateLogger(finalPath, _currentCoords, _currentMapName, Monitor);
+            CoordinateLogger file = new CoordinateLogger(finalPath, _currentCoords, _currentMapName, _trackingCursor, _config.LogTrackingTarget, Monitor);
 
             if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
             {

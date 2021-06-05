@@ -19,6 +19,9 @@ namespace PlayerCoordinates.Utilities
         private readonly string _mapName;
         private readonly IMonitor _monitor;
 
+        private bool _logTrackingTarget;
+        private bool _trackingCursor;
+
         /// <summary>
         /// 
         /// </summary>
@@ -26,12 +29,15 @@ namespace PlayerCoordinates.Utilities
         /// <param name="coordinates">Co-ordinates to log</param>
         /// <param name="mapName">Map name</param>
         /// <param name="monitor">SMAPI logger</param>
-        public CoordinateLogger(string fileName, Coordinates coordinates, string mapName, IMonitor monitor)
+        public CoordinateLogger(string fileName, Coordinates coordinates, string mapName, bool trackingCursor,
+                                bool logTrackingTarget, IMonitor monitor)
         {
             _fileInfo = new FileInfo(fileName);
             _coordsToAdd = new Coordinates(coordinates.x, coordinates.y);
             _mapName = mapName;
             _monitor = monitor;
+            _trackingCursor = trackingCursor;
+            _logTrackingTarget = logTrackingTarget;
         }
 
         public bool LogCoordinates()
@@ -73,7 +79,9 @@ namespace PlayerCoordinates.Utilities
         {
             // Add new co-ordinates to the existing file contents, if any.
             _fileContents.Add($"Map: {_mapName}");
-            _fileContents.Add($"X: {_coordsToAdd.x}, Y: {_coordsToAdd.y}");
+            if (_logTrackingTarget) // If the player doesn't want to log the co-ordinate source, we needn't do anything!
+                _fileContents.Add($"Tracking: {(_trackingCursor ? "Cursor" : "Player")}");
+            _fileContents.Add($"Tile X: {_coordsToAdd.x}, Tile Y: {_coordsToAdd.y}");
         }
 
         private void LoadCoordsFromFile()
