@@ -14,6 +14,7 @@
         <PostBuildEvent>
             echo Pushing to Android device: "$(GameModsPath)"
             adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
-        </PostBuildEvent>        
+            adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
+        </PostBuildEvent> <!-- A double push, because... apparently that's required?-->
     </PropertyGroup>
 </Project>
