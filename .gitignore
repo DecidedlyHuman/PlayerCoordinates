@@ -6,5 +6,6 @@ bin/
 obj/
 Properties/
 *.DotSettings.user
-ReleaseZip/
+Release/Zip/
+Release/Android/
 /packages
