@@ -117,7 +117,8 @@ namespace PlayerCoordinates
             string finalPath = Path.Combine(_modDirectory, "coordinate_output.txt");
 
             // This is bad, and I need to split things up better. At some point. For now, this is fine.
-            CoordinateLogger file = new CoordinateLogger(finalPath, _currentCoords, _currentMapName, _trackingCursor, _config.LogTrackingTarget, Monitor);
+            CoordinateLogger file = new CoordinateLogger(finalPath, _currentCoords, _currentMapName, _trackingCursor,
+                _config.LogTrackingTarget, Monitor);
 
             if (file.LogCoordinates()) // Try to log the co-ordinates, and determine whether or not we were successful.
             {
@@ -149,10 +150,19 @@ namespace PlayerCoordinates
             // Everything below this point is messy and terrible, and I am a bad person for doing so.
             // It works, but do not do what I do.
             // TODO: Make everything below here not terrible.
+
+#if ANDROID
+            Vector2 HudPosition = new Vector2(125, 9);
+            Vector2 topTextPosition = new Vector2(148, 17);
+            Vector2 bottomTextPosition = new Vector2(topTextPosition.X, topTextPosition.Y + 36);
+#else
+            Vector2 HudPosition = new Vector2(9, 9);
             Vector2 topTextPosition = new Vector2(23, 17);
             Vector2 bottomTextPosition = new Vector2(topTextPosition.X, topTextPosition.Y + 36);
+#endif
 
-            world.SpriteBatch.Draw(_coordinateBox, new Vector2(9, 9), Color.White);
+
+            world.SpriteBatch.Draw(_coordinateBox, HudPosition, Color.White);
             Utility.drawTextWithShadow(world.SpriteBatch,
                 $"X: {_currentCoords.x}",
                 Game1.dialogueFont,
@@ -170,16 +180,22 @@ namespace PlayerCoordinates
                 if (_currentCoords.y < 0 || _currentCoords.x < 0)
                     return; // We don't want to draw our tile rectangle if the cursor coordinates are negative.
 
+#if ANDROID
+                float zoomLevel = 1f;
+#else
+                float zoomLevel = Game1.options.zoomLevel;
+#endif
+
                 world.SpriteBatch.Draw(
                     Game1.mouseCursors,
                     Game1.GlobalToLocal(
                         Game1.viewport,
-                        new Vector2(_currentCoords.x, _currentCoords.y) * Game1.tileSize) * Game1.options.zoomLevel,
+                        new Vector2(_currentCoords.x, _currentCoords.y) * Game1.tileSize) * zoomLevel,
                     Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 29),
                     Color.White,
                     0.0f,
                     Vector2.Zero,
-                    Game1.options.zoomLevel,
+                    zoomLevel,
                     SpriteEffects.None,
                     0f);
             }
