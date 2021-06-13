@@ -34,6 +34,8 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Android|AnyCPU' ">
         <OutputPath>bin\Android\</OutputPath>
         <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="Microsoft.Build"/>
