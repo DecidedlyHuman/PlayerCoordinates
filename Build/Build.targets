@@ -11,10 +11,12 @@
         <GameModsPath>$(SolutionDir)Release\Android</GameModsPath>
         <ModZipPath>$(SolutionDir)Release\Zip</ModZipPath>
 
-        <PostBuildEvent> <!-- A double push, because... apparently that's required? I'm sure there's a proper ADB way to ensure things work on the first go, but I don't know what that is yes.-->
-            echo Pushing to Android device: "$(GameModsPath)"
-            adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
-            adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
+        <PostBuildEvent> 
+            echo Pushing to Android device: "$(GameModsPath)"            
         </PostBuildEvent> 
+        <PostBuildEvent> <!-- A double push, because... apparently that's required? I'm sure there's a proper ADB way to ensure things work on the first go, but I don't know what that is yes.-->
+            adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
+            adb push "$(GameModsPath)"\PlayerCoordinates /sdcard/StardewValley/Mods
+        </PostBuildEvent>
     </PropertyGroup>
 </Project>
