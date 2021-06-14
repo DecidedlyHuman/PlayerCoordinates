@@ -60,6 +60,7 @@
     <ItemGroup>
         <Content Include="assets\box.png"/>
         <Content Include="manifest.json"/>
+        <Content Include="TODOS.md"/>
     </ItemGroup>
     <ItemGroup>
         <None Include="packages.config"/>
