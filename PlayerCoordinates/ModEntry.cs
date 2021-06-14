@@ -49,6 +49,7 @@ namespace PlayerCoordinates
             }
             catch (Exception ex)
             {
+                Monitor.Log("User doesn't appear to have GMCM installed. Not an error.", LogLevel.Info);
             }
         }
 
