@@ -17,10 +17,12 @@ namespace PlayerCoordinates
         private Texture2D _coordinateBox;
         private ModConfig _config;
         private bool _showHud = true;
+        private bool _hudLocked = true;
         private bool _trackingCursor;
         private string _currentMapName;
         private string _modDirectory;
         private Coordinates _currentCoords;
+        private Coordinates _currentCursorCoords;
 
         /*********
         ** Public methods
@@ -33,11 +35,36 @@ namespace PlayerCoordinates
             helper.Events.Display.RenderedHud += DrawCoordinates;
             helper.Events.Display.RenderedWorld += UpdateCurrentMap;
             helper.Events.Input.ButtonPressed += ButtonPressed;
+            helper.Events.Input.ButtonReleased += ButtonReleased;
+            helper.Events.Display.WindowResized += WindowResized;
+
+// Since I can't think of a way to log co-ordinates on Android, a toggle to make the HUD movable is 
+// also out of the question until I figure that out.
+#if ANDROID
+#else
+            helper.Events.GameLoop.UpdateTicked += UpdateTicked;
+#endif
             _modDirectory = Helper.DirectoryPath;
 
             // The default source is the current mod folder, so we don't need to specify that here.
             _coordinateBox = helper.Content.Load<Texture2D>("assets/box.png");
         }
+
+        private void WindowResized(object sender, WindowResizedEventArgs e)
+        {
+        }
+
+#if ANDROID // Game1.options does not exist on Android, and SMAPI will kill the mod if we use it.
+#else
+        private void UpdateTicked(object sender, UpdateTickedEventArgs e)
+        {
+            if (!_hudLocked)
+            {
+                _config.HudXCoord = Game1.getMouseX();
+                _config.HudYCoord = Game1.getMouseY();
+            }
+        }
+#endif
 
         private void GameLaunched(object sender, GameLaunchedEventArgs e)
         {
@@ -78,6 +105,24 @@ namespace PlayerCoordinates
                 "The key used to toggle between tracking the cursor and the player's co-ordinates.",
                 () => _config.SwitchToCursorCoords,
                 (button) => _config.SwitchToCursorCoords = button);
+            configMenuApi.RegisterSimpleOption(ModManifest, "HUD X Co-ordinate:",
+                "The X co-ordinate of the HUD",
+                () => _config.HudXCoord,
+                (int value) => _config.HudXCoord = value);
+            configMenuApi.RegisterSimpleOption(ModManifest, "HUD Y Co-ordinate:",
+                "The Y co-ordinate of the HUD",
+                () => _config.HudYCoord,
+                (int value) => _config.HudYCoord = value);
+
+// Since I can't think of a way to log co-ordinates on Android, a toggle to make the HUD movable is 
+// also out of the question until I figure that out.
+#if ANDROID
+#else
+            configMenuApi.RegisterSimpleOption(ModManifest, "Unlock HUD Position",
+                "Press this key to toggle the HUD to be unlocked so you can move it around.",
+                () => _config.HudUnlock,
+                (button) => _config.HudUnlock = button);
+#endif
         }
 
         private void ButtonPressed(object o, ButtonPressedEventArgs button)
@@ -92,6 +137,20 @@ namespace PlayerCoordinates
 
             if (b == _config.LogCoordinates)
                 LogCurrentCoordinates();
+
+            if (b == _config.HudUnlock)
+                _hudLocked = false;
+        }
+        
+        private void ButtonReleased(object sender, ButtonReleasedEventArgs button)
+        {
+            SButton b = button.Button;
+
+            if (b == _config.HudUnlock)
+            {
+                _hudLocked = true;
+                this.Helper.WriteConfig(_config);
+            }
         }
 
         private void UpdateCurrentMap(object o, RenderedWorldEventArgs world)
@@ -152,40 +211,18 @@ namespace PlayerCoordinates
             // It works, but do not do what I do.
             // TODO: Make everything below here not terrible.
 
+            DrawHud.Draw(new Vector2(_config.HudXCoord, _config.HudYCoord), _currentCoords, _coordinateBox, world);
+
 #if ANDROID
-            Vector2 HudPosition = new Vector2(125, 9);
-            Vector2 topTextPosition = new Vector2(148, 17);
-            Vector2 bottomTextPosition = new Vector2(topTextPosition.X, topTextPosition.Y + 36);
+            // Do absolutely nothing.
 #else
-            Vector2 HudPosition = new Vector2(9, 9);
-            Vector2 topTextPosition = new Vector2(23, 17);
-            Vector2 bottomTextPosition = new Vector2(topTextPosition.X, topTextPosition.Y + 36);
-#endif
-
-
-            world.SpriteBatch.Draw(_coordinateBox, HudPosition, Color.White);
-            Utility.drawTextWithShadow(world.SpriteBatch,
-                $"X: {_currentCoords.x}",
-                Game1.dialogueFont,
-                topTextPosition,
-                Color.Black);
-            Utility.drawTextWithShadow(world.SpriteBatch,
-                $"Y: {_currentCoords.y}",
-                Game1.dialogueFont,
-                bottomTextPosition,
-                Color.Black);
-
             //Draw a rectangle around the cursor position when tracking the cursor.
             if (_trackingCursor)
             {
                 if (_currentCoords.y < 0 || _currentCoords.x < 0)
                     return; // We don't want to draw our tile rectangle if the cursor coordinates are negative.
 
-#if ANDROID
-                float zoomLevel = 1f;
-#else
                 float zoomLevel = Game1.options.zoomLevel;
-#endif
 
                 world.SpriteBatch.Draw(
                     Game1.mouseCursors,
@@ -200,6 +237,7 @@ namespace PlayerCoordinates
                     SpriteEffects.None,
                     0f);
             }
+#endif
         }
     }
 }
